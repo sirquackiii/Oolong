@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdint.h>
+
 #include "cpu.h"
 
 // Stolen: https://stackoverflow.com/questions/111928/is-there-a-printf-converter-to-print-in-binary-format/45041802
@@ -12,7 +14,7 @@ void print_binary(int number, int num_digits) {
 int main() {
     CPU cpu;
 
-    byte code[4] = {0x1, 0x1, 0x69, 0xB};
+    uint8_t code[4] = {0x1, 0x1, 0x69, 0xB};
     FILE* fcode;
     fcode = fopen("code.bin","wb");
     fwrite(code, sizeof(code), 1, fcode);
