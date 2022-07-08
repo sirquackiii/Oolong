@@ -7,6 +7,9 @@ typedef struct Cpu {
     // Ram, ig
     byte mem[0xffff];
 
+    // where the code is
+    byte code[0xffff];
+
     // Stack
     byte stack[0xff];
     byte sp;

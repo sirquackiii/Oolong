@@ -8,7 +8,7 @@ int main() {
     push(&cpu, 0x69);
     pop(&cpu, 'a');
 
-    printf("A Reg: %d", cpu.a);
+    printf("A Reg: 0x%x\n", cpu.a);
 
     // print stack
     // for (int i = 0; i < 0xff; i++) {
