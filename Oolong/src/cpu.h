@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdlib.h>
+
 typedef unsigned char byte;
 typedef unsigned short word;
 
@@ -9,6 +11,7 @@ typedef struct Cpu {
 
     // where the code is
     byte code[0xffff];
+    word pc;
 
     // Stack
     byte stack[0xff];
@@ -18,9 +21,12 @@ typedef struct Cpu {
     byte a;
     byte b;
     byte c;
-} cpu;
 
-void reset(cpu* cpu) {
+    long instReg;
+    byte flagReg; 
+} CPU;
+
+void reset(CPU* cpu) {
     cpu->sp = cpu->a = cpu->b = cpu-> c = 0;
 
     for (int i = 0; i < 0xff; i++) {
@@ -32,7 +38,7 @@ void reset(cpu* cpu) {
     }
 }
 
-void ld(cpu* cpu, char reg, byte val) {
+void ld(CPU* cpu, char reg, byte val) {
     switch (reg) {
         case 'a':{
             cpu->a = val;
@@ -47,7 +53,7 @@ void ld(cpu* cpu, char reg, byte val) {
     }
 }
 
-void st(cpu* cpu, char reg, word addr) {
+void st(CPU* cpu, char reg, word addr) {
     switch (reg) {
         case 'a':{
             cpu->mem[addr] = cpu->a;
@@ -62,20 +68,20 @@ void st(cpu* cpu, char reg, word addr) {
     }
 }
 
-void poke(cpu* cpu, word addr, byte val) {
+void poke(CPU* cpu, word addr, byte val) {
     cpu->mem[addr] = val;
 }
 
-void peek(cpu* cpu, word addr) {
+void peek(CPU* cpu, word addr) {
     cpu->a = cpu->mem[addr];
 }
 
-void push(cpu* cpu, byte val) {
+void push(CPU* cpu, byte val) {
     cpu->stack[cpu->sp] = val;
     cpu->sp++;
 }
 
-void pop(cpu* cpu, char reg) {
+void pop(CPU* cpu, char reg) {
     switch (reg) {
         case 'a':{
             cpu->sp--;
@@ -92,6 +98,70 @@ void pop(cpu* cpu, char reg) {
             cpu->c = cpu->stack[cpu->sp];
             cpu->stack[cpu->sp] = 0;
             break;
+        }
+    }
+}
+
+// Math & Logic
+
+void add(CPU* cpu) {
+    cpu->c = cpu->a + cpu->b;
+}
+
+void sub(CPU* cpu) {
+    cpu->c = cpu->a - cpu->b;
+}
+
+void mul(CPU* cpu) {
+    cpu->c = cpu->a * cpu->b;
+}
+
+void div(CPU* cpu) {
+    cpu->c = cpu->a / cpu->b;
+}
+
+void and(CPU* cpu) {
+    cpu->c = cpu->a & cpu->b;
+}
+
+void or(CPU* cpu) {
+    cpu->c = cpu->a | cpu->b;
+}
+
+void xor(CPU* cpu) {
+    cpu->c = cpu->a ^ cpu->b;
+}
+
+void not(CPU* cpu) {
+    cpu->c = ~cpu->a;
+}
+
+// execution
+void execute(CPU* cpu) {
+    cpu->pc = 0;
+    for (; cpu->pc < 0xffff; cpu->pc++) {
+        switch (cpu->code[cpu->pc]) {
+            case 0x00:{
+                break;
+            } case 0x01:{
+                switch (cpu->code[cpu->pc + 1]) {
+                    case 0x1:{
+                        ld(cpu, 'a', cpu->code[cpu->pc + 2]);
+                        printf("A REG: 0x%x\n", cpu->a);
+                        break;
+                    } case 0x2:{
+                        ld(cpu, 'b', cpu->code[cpu->pc + 2]);
+                        break;
+                    } case 0x3:{
+                        ld(cpu, 'c', cpu->code[cpu->pc + 2]);
+                        break;
+                    }
+                }
+                cpu->pc += 3;
+                break;
+
+            }
+
         }
     }
 }
