@@ -20,25 +20,30 @@ typedef struct Cpu {
     uint8_t c;
 
     long instReg;
-    uint8_t flagReg; 
+    uint8_t flagReg; // Zero, Carry, Overflow, Equal, Parity, Custom, Negative
 } CPU;
 
-void reset(CPU* cpu);
-void ld(CPU* cpu, char reg, uint8_t val);
-void st(CPU* cpu, char reg, uint16_t addr);
-void poke(CPU* cpu, uint16_t addr, uint8_t val);
-void peek(CPU* cpu, uint16_t addr);
-void push(CPU* cpu, uint8_t val);
-void pop(CPU* cpu, char reg);
+void cpu_reset(CPU* cpu);
+void cpu_ld(CPU* cpu, char reg, uint8_t val);
+void cpu_st(CPU* cpu, char reg, uint16_t addr);
+void cpu_poke(CPU* cpu, uint16_t addr, uint8_t val);
+void cpu_peek(CPU* cpu, uint16_t addr);
+void cpu_push(CPU* cpu, uint8_t val);
+void cpu_pop(CPU* cpu, char reg);
 
 // Math & Logic
+void cpu_add(CPU* cpu);
+void cpu_sub(CPU* cpu);
+void cpu_mul(CPU* cpu);
+void cpu_div(CPU* cpu);
+void cpu_and(CPU* cpu);
+void cpu_or(CPU* cpu);
+void cpu_xor(CPU* cpu);
+void cpu_not(CPU* cpu);
+void cpu_execute(CPU* cpu);
 
-void add(CPU* cpu);
-void sub(CPU* cpu);
-void mul(CPU* cpu);
-void div(CPU* cpu);
-void and(CPU* cpu);
-void or(CPU* cpu);
-void xor(CPU* cpu);
-void not(CPU* cpu);
-void execute(CPU* cpu);
+// other stuff
+void cpu_cmp(CPU* cpu);
+
+// other utils
+int cpu_intcat(int a, int b);
