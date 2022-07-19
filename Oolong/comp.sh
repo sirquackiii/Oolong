@@ -1,1 +1,1 @@
-gcc src/*.c -g -o Oolong
+gcc src/*.c -g -o oolong

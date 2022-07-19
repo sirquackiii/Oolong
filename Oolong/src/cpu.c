@@ -5,27 +5,29 @@
 
 #include "cpu.h"
 
-int cpu_intcat(int a, int b) {
+uint8_t cpu_intcat(uint8_t a, uint8_t b) {
     char s1[20];
     char s2[20];
  
     // Convert both the integers to string
-    sprintf(s1, "%d", a);
-    sprintf(s2, "%d", b);
+    sprintf(s1, "%x", a);
+    sprintf(s2, "%x", b);
  
     // Concatenate both strings
     strcat(s1, s2);
+    printf("CAT: %s\n", s1);
  
     // Convert the concatenated string
     // to integer
-    int c = atoi(s1);
+    int num = (int)strtol(s1, NULL, 16);
  
+    printf("intcat out: 0x%x\n", (uint16_t)num);
     // return the formed integer
-    return c;
+    return (uint16_t)num;
 }
 
 void cpu_reset(CPU* cpu) {
-    cpu->sp = cpu->a = cpu->b = cpu-> c = 0;
+    cpu->sp = cpu->a = cpu->b = cpu->c = 0;
 
     for (int i = 0; i < 0xff; i++) {
         cpu->stack[i] = 0;
@@ -138,6 +140,7 @@ void cpu_not(CPU* cpu) {
 void cpu_execute(CPU* cpu) {
     cpu->pc = 0;
     for (; cpu->pc < 0xffff; cpu->pc++) {
+        printf("0x%x\n", cpu->pc);
         switch (cpu->code[cpu->pc]) {
             case 0x01:{
                 switch (cpu->code[cpu->pc + 1]) {
@@ -153,16 +156,39 @@ void cpu_execute(CPU* cpu) {
                     }
                 }
                 cpu->pc += 2;
-                printf("A REG: 0x%x\n", cpu->a);
+                printf("NEWADDR: 0x%x\n", cpu->code[cpu->pc]);
                 break;
-
+            } case 0x2:{
+                puts("gjfdsjkfd");
+                uint16_t addr = cpu_intcat(cpu->code[cpu->pc + 2], cpu->code[cpu->pc + 3]);
+                switch (cpu->code[cpu->pc + 1]) {
+                    case 0x1:{
+                        cpu_st(cpu, 'a', addr);
+                        break;
+                    } case 0x2:{
+                        cpu_st(cpu, 'b', addr);
+                        break;
+                    } case 0x3:{
+                        cpu_st(cpu, 'c', addr);
+                        break;
+                    }
+                }
+                printf("ADDR: 0x%x\n", cpu->mem[addr]);
+                cpu->pc += 3;
+                break;
             } case 0xB:{
-                return;
+                goto exit; // im so sorry
             } case 0xC:{
-                cpu->pc = (uint8_t)cpu_intcat((int)cpu->code[cpu->pc + 1], (int)cpu->code[cpu->pc + 2]) - 1;
+                cpu->pc = cpu_intcat(cpu->code[cpu->pc + 1], cpu->code[cpu->pc + 2]) - 1;
                 // printf("%d\n%x\n", cpu->pc, cpu->code[cpu->pc]);
                 break;
             }
         }
+
+        // if (cpu->mem[0] != 0) {
+        //     printf("%c", cpu->mem[0]);
+        // }
+
+        exit: return;
     }
 }

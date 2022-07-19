@@ -1,3 +1,0 @@
-$main:
-    ld a, 0x16
-    ld b, 

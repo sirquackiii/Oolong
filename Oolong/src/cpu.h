@@ -20,7 +20,7 @@ typedef struct Cpu {
     uint8_t c;
 
     long instReg;
-    uint8_t flagReg; // Zero, Carry, Overflow, Equal, Parity, Custom, Negative
+    uint8_t flagReg; // Zero, Carry, Overflow, Equal, Parity, Greater, Less
 } CPU;
 
 void cpu_reset(CPU* cpu);
@@ -46,4 +46,4 @@ void cpu_execute(CPU* cpu);
 void cpu_cmp(CPU* cpu);
 
 // other utils
-int cpu_intcat(int a, int b);
+uint8_t cpu_intcat(uint8_t a, uint8_t b);

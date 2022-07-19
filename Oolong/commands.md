@@ -13,5 +13,5 @@ Adding: c = a OP b
 `mul`, `0x09`, 1 byte
 `div`, `0xA`, 1 byte
 
-`break`, `0xB`, 1 bytes
+`halt`, `0xB`, 1 bytes
 `jmp addr`, `0xC, addr`, 3 bytes
