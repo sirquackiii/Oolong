@@ -13,14 +13,6 @@ void print_binary(int number, int num_digits) {
 }
 
 int main(int argc, char** argv) {
-    CPU cpu;
-
-    // uint8_t code[4] = {
-    //     0x1, 0x1, 0x69, 0xB
-    // };
-
-    cpu_reset(&cpu);
-
     FILE* fcode;
     uint8_t* buffer;
     long filelen;
@@ -35,6 +27,8 @@ int main(int argc, char** argv) {
     fread(buffer, filelen, 1, fcode);
     fclose(fcode);
 
+    CPU cpu;
+    cpu_reset(&cpu);
     uint8_t code[sizeof(buffer)];
 
     for (int i = 0; i < sizeof(buffer); i++) {

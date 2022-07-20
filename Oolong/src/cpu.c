@@ -138,8 +138,7 @@ void cpu_not(CPU* cpu) {
 
 // execution
 void cpu_execute(CPU* cpu) {
-    cpu->pc = 0;
-    for (; cpu->pc < 0xffff; cpu->pc++) {
+    for (cpu->pc = 0; cpu->code[cpu->pc] != 0xB; cpu->pc++) {
         printf("0x%x\n", cpu->pc);
         switch (cpu->code[cpu->pc]) {
             case 0x01:{
@@ -158,7 +157,7 @@ void cpu_execute(CPU* cpu) {
                 cpu->pc += 2;
                 printf("NEWADDR: 0x%x\n", cpu->code[cpu->pc]);
                 break;
-            } case 0x2:{
+            } case 0x02:{
                 puts("gjfdsjkfd");
                 uint16_t addr = cpu_intcat(cpu->code[cpu->pc + 2], cpu->code[cpu->pc + 3]);
                 switch (cpu->code[cpu->pc + 1]) {
@@ -185,10 +184,11 @@ void cpu_execute(CPU* cpu) {
             }
         }
 
-        // if (cpu->mem[0] != 0) {
-        //     printf("%c", cpu->mem[0]);
-        // }
+        if (cpu->mem[0] != 0) {
+            printf("%c", cpu->mem[0]);
+        }
 
+        cont: continue;
         exit: return;
     }
 }
