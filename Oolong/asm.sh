@@ -1,0 +1,1 @@
+python3 SuStA.py oolong.ola code.bin

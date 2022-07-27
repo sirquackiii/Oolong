@@ -1,3 +1,3 @@
-ld a 0x69
-st a 0xBEEF
+ld a $42
+st a $BEEF
 halt

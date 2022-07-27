@@ -1,1 +1,1 @@
-gcc src/*.c -g -o oolong
+gcc src/*.c -lncurses -o oolong

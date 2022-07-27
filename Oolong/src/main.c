@@ -3,6 +3,13 @@
 #include <stdlib.h>
 
 #include "cpu.h"
+#include "terminal.h"
+
+FILE* fcode;
+uint8_t* buffer;
+long filelen;
+CPU cpu;
+uint8_t code[0xffff];
 
 // Stolen: https://stackoverflow.com/questions/111928/is-there-a-printf-converter-to-print-in-binary-format/45041802
 void print_binary(int number, int num_digits) {
@@ -12,13 +19,9 @@ void print_binary(int number, int num_digits) {
     }
 }
 
-int main(int argc, char** argv) {
-    FILE* fcode;
-    uint8_t* buffer;
-    long filelen;
-
+void load_code(char* fn) {
     // file bullshit i stole from stack overflow
-    fcode = fopen(argv[1], "rb");
+    fcode = fopen(fn, "rb");
     fseek(fcode, 0, SEEK_END);
     filelen = ftell(fcode);
     rewind(fcode);
@@ -27,20 +30,22 @@ int main(int argc, char** argv) {
     fread(buffer, filelen, 1, fcode);
     fclose(fcode);
 
-    CPU cpu;
     cpu_reset(&cpu);
-    uint8_t code[sizeof(buffer)];
 
     for (int i = 0; i < sizeof(buffer); i++) {
         code[i] = buffer[i];
     }
-
+    
     for (int i = 0; i < sizeof(code); i++) {
         cpu.code[i] = code[i];
     }
+}
 
-    cpu_execute(&cpu);
-    printf("A REG: 0x%x\n", cpu.a);
+int main(int argc, char** argv) {
+    load_code(argv[1]);
+
+    printf("\x1b[1;31m");
+    puts("hello");
 
     // print stack
     // for (int i = 0; i < 0xff; i++) {

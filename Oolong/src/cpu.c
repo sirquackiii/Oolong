@@ -2,10 +2,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 
 #include "cpu.h"
+#include "terminal.h"
 
-uint8_t cpu_intcat(uint8_t a, uint8_t b) {
+uint16_t cpu_hexcat(uint8_t a, uint8_t b) {
     char s1[20];
     char s2[20];
  
@@ -15,15 +17,25 @@ uint8_t cpu_intcat(uint8_t a, uint8_t b) {
  
     // Concatenate both strings
     strcat(s1, s2);
-    printf("CAT: %s\n", s1);
  
     // Convert the concatenated string
     // to integer
-    int num = (int)strtol(s1, NULL, 16);
- 
-    printf("intcat out: 0x%x\n", (uint16_t)num);
+    uint16_t num = (uint16_t)strtol(s1, NULL, 16);
+
     // return the formed integer
-    return (uint16_t)num;
+    return num;
+}
+
+// S-S-S-STOLEN!!!: https://www.geeksforgeeks.org/time-delay-c/
+void cpu_delay(int secs) {
+    // Converting time into milli_seconds
+    int milli_seconds = 1000 * secs;
+  
+    // Storing start time
+    clock_t start_time = clock();
+  
+    // looping till required time is not achieved
+    while (clock() < start_time + milli_seconds) {}
 }
 
 void cpu_reset(CPU* cpu) {
@@ -139,27 +151,32 @@ void cpu_not(CPU* cpu) {
 // execution
 void cpu_execute(CPU* cpu) {
     for (cpu->pc = 0; cpu->code[cpu->pc] != 0xB; cpu->pc++) {
-        printf("0x%x\n", cpu->pc);
+        cpu_delay(1);
+        puts("executing...");
+        printf("0x%x: 0x%x\n", cpu->pc, cpu->code[cpu->pc]);
         switch (cpu->code[cpu->pc]) {
-            case 0x01:{
+            case 0x01:{ // load a immediate
+                cpu_ld(cpu, 'a', cpu->code[cpu->pc + 2]);
+                cpu->pc += 2;
+                break;
+            } case 0x02:{ // load absolute
+                uint16_t addr = cpu_hexcat(cpu->code[cpu->pc + 2], cpu->code[cpu->pc + 3]);
                 switch (cpu->code[cpu->pc + 1]) {
                     case 0x1:{
-                        cpu_ld(cpu, 'a', cpu->code[cpu->pc + 2]);
+                        cpu_ld(cpu, 'a', cpu->code[addr]);
                         break;
                     } case 0x2:{
-                        cpu_ld(cpu, 'b', cpu->code[cpu->pc + 2]);
+                        cpu_ld(cpu, 'b', cpu->code[addr]);
                         break;
                     } case 0x3:{
-                        cpu_ld(cpu, 'c', cpu->code[cpu->pc + 2]);
+                        cpu_ld(cpu, 'c', cpu->code[addr]);
                         break;
                     }
                 }
-                cpu->pc += 2;
-                printf("NEWADDR: 0x%x\n", cpu->code[cpu->pc]);
+                cpu->pc += 3;
                 break;
-            } case 0x02:{
-                puts("gjfdsjkfd");
-                uint16_t addr = cpu_intcat(cpu->code[cpu->pc + 2], cpu->code[cpu->pc + 3]);
+            } case 0x03:{
+                uint16_t addr = cpu_hexcat(cpu->code[cpu->pc + 2], cpu->code[cpu->pc + 3]);
                 switch (cpu->code[cpu->pc + 1]) {
                     case 0x1:{
                         cpu_st(cpu, 'a', addr);
@@ -172,13 +189,18 @@ void cpu_execute(CPU* cpu) {
                         break;
                     }
                 }
-                printf("ADDR: 0x%x\n", cpu->mem[addr]);
+                cpu->pc += 3;
+                break;
+            } case 0x03:{
+                puts("I'm poking!");
+                uint16_t addr = cpu_hexcat(cpu->code[cpu->pc + 2], cpu->code[cpu->pc + 3]);
+                cpu_poke(cpu, addr, cpu->code[cpu->pc + 1]);
                 cpu->pc += 3;
                 break;
             } case 0xB:{
                 goto exit; // im so sorry
             } case 0xC:{
-                cpu->pc = cpu_intcat(cpu->code[cpu->pc + 1], cpu->code[cpu->pc + 2]) - 1;
+                cpu->pc = cpu_hexcat(cpu->code[cpu->pc + 1], cpu->code[cpu->pc + 2]) - 1;
                 // printf("%d\n%x\n", cpu->pc, cpu->code[cpu->pc]);
                 break;
             }
@@ -187,6 +209,8 @@ void cpu_execute(CPU* cpu) {
         if (cpu->mem[0] != 0) {
             printf("%c", cpu->mem[0]);
         }
+
+        cpu->mem[0] = 0;
 
         cont: continue;
         exit: return;
