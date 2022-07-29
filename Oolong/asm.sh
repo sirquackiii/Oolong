@@ -1,1 +1,1 @@
-python3 SuStA.py oolong.ola code.bin
+python3 aSUSembler.py oolong.ola code.bin

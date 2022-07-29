@@ -148,8 +148,25 @@ void cpu_not(CPU* cpu) {
     cpu->c = ~cpu->a;
 }
 
+void cpu_load_absolute(CPU* cpu, char reg) {
+    uint16_t addr = cpu_hexcat(cpu->code[cpu->pc + 2], cpu->code[cpu->pc + 3]);
+    switch (reg) {
+        case 'a':{
+            cpu->a = cpu->mem[addr];
+            break;
+        } case 'b':{
+            cpu->b = cpu->mem[addr];
+            break;
+        } case 'c':{
+            cpu->c = cpu->mem[addr];
+            break;
+        }
+    }
+}
+
 // execution
 void cpu_execute(CPU* cpu) {
+    char out;
     for (cpu->pc = 0; cpu->code[cpu->pc] != 0xB; cpu->pc++) {
         cpu_delay(1);
         puts("executing...");
@@ -159,42 +176,23 @@ void cpu_execute(CPU* cpu) {
                 cpu_ld(cpu, 'a', cpu->code[cpu->pc + 2]);
                 cpu->pc += 2;
                 break;
-            } case 0x02:{ // load absolute
-                uint16_t addr = cpu_hexcat(cpu->code[cpu->pc + 2], cpu->code[cpu->pc + 3]);
-                switch (cpu->code[cpu->pc + 1]) {
-                    case 0x1:{
-                        cpu_ld(cpu, 'a', cpu->code[addr]);
-                        break;
-                    } case 0x2:{
-                        cpu_ld(cpu, 'b', cpu->code[addr]);
-                        break;
-                    } case 0x3:{
-                        cpu_ld(cpu, 'c', cpu->code[addr]);
-                        break;
-                    }
-                }
+            } case 0x02:{ // load a absolute
+                cpu_load_absolute(cpu, 'a');
                 cpu->pc += 3;
                 break;
-            } case 0x03:{
-                uint16_t addr = cpu_hexcat(cpu->code[cpu->pc + 2], cpu->code[cpu->pc + 3]);
-                switch (cpu->code[cpu->pc + 1]) {
-                    case 0x1:{
-                        cpu_st(cpu, 'a', addr);
-                        break;
-                    } case 0x2:{
-                        cpu_st(cpu, 'b', addr);
-                        break;
-                    } case 0x3:{
-                        cpu_st(cpu, 'c', addr);
-                        break;
-                    }
-                }
+            } case 0x03:{ // load b immediate
+                cpu_ld(cpu, 'b', cpu->code[cpu->pc + 2]);
+                cpu->pc += 2;
+                break;
+            } case 0x04:{ // load b absolute
+                cpu_load_absolute(cpu, 'b');
                 cpu->pc += 3;
                 break;
-            } case 0x03:{
-                puts("I'm poking!");
-                uint16_t addr = cpu_hexcat(cpu->code[cpu->pc + 2], cpu->code[cpu->pc + 3]);
-                cpu_poke(cpu, addr, cpu->code[cpu->pc + 1]);
+            } case 0x05:{
+                cpu_ld(cpu, 'c', cpu->code[cpu->pc + 2]);
+                cpu->pc += 2;
+            } case 0x06:{
+                cpu_load_absolute(cpu, 'c');
                 cpu->pc += 3;
                 break;
             } case 0xB:{
@@ -207,7 +205,8 @@ void cpu_execute(CPU* cpu) {
         }
 
         if (cpu->mem[0] != 0) {
-            printf("%c", cpu->mem[0]);
+            sprintf(out, "%c", cpu->mem[0]);
+            mvaddstr(cpu->x, cpu->y, out);
         }
 
         cpu->mem[0] = 0;

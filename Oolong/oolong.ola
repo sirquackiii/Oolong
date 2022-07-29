@@ -1,3 +1,1 @@
-ld a $42
-st a $BEEF
-halt
+ld a $FF

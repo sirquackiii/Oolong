@@ -42,10 +42,9 @@ void load_code(char* fn) {
 }
 
 int main(int argc, char** argv) {
-    load_code(argv[1]);
+    load_file(argv[1]);
 
-    printf("\x1b[1;31m");
-    puts("hello");
+    print_fibonacci(10);
 
     // print stack
     // for (int i = 0; i < 0xff; i++) {

@@ -11,10 +11,10 @@ lda #$ff
 -- 00  01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F
 00 nop lai laa lbi lba lci lca sai saa sbi sba sci sca
 10 pki pka phi pha ppi ppa
-20 add sub mul div and or  xor not
-30 cmp jmp jeq jgr jle jze jca jov jpa jcu
-40 brk
-50
+20 add sub mul div and or  xor not ica icb icc icx icy dca dcb dcc
+30 cmp jmp jeq jgr jle jze jca jov jpa jcu cll ret
+40 brk dcx dcy
+50 lxi lxa lyi lya
 60
 70
 80
@@ -37,7 +37,12 @@ PARITY
 CUSTOM
 
 escape codes:
-`00`: clear screen
+MUST start with `EC` (escape code)
+MUST end with `00`
+`EC E0`: clear screen
+`EC E1 x, y`: move cursor to x and y
+`EC E2 forground nibble, background nibble`: set color
+
 
 `0x00`: nop
 load immediate: `ld reg, val`, `0x01, reg, val`, 3 bytes

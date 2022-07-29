@@ -18,8 +18,13 @@ typedef struct Cpu {
     uint8_t a;
     uint8_t b;
     uint8_t c;
-    long instReg;
+
+    // private regs
     uint8_t flagReg; // Zero, Carry, Overflow, Equal, Parity, Greater, Less
+
+    // terminal stuff
+    uint8_t x;
+    uint8_t y;
 } CPU;
 
 void cpu_reset(CPU* cpu);
@@ -47,3 +52,4 @@ void cpu_cmp(CPU* cpu);
 // other utils
 uint8_t cpu_intcat(uint8_t a, uint8_t b);
 void cpu_delay(int secs);
+void cpu_load_absolute(CPU* cpu, char reg);

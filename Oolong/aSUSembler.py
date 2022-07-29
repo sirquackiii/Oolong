@@ -1,8 +1,8 @@
-# SuStA (SUper STupid Assembler)
+# aSUSembler, i dont know what to call it
+# fuck you
 # by SirQ, worst programmer ever
 
-# dont expect anything good, i just dont want to program in hex
-# pronounced "sOOs-Tuh", if you say "suhs-tuh" i will break your knees
+# dont expect anything good, i just dont want to program in hex= 
 
 import sys
 
@@ -19,7 +19,9 @@ opcodes = {
     "sbi": 0x9,
     "sba": 0xA,
     "sci": 0xB,
-    "sca": 0xC
+    "sca": 0xC,
+    "pki": 0x10,
+    "pka": 0x11
 }
 
 # CLASSES
@@ -74,12 +76,10 @@ def compileNum(st):
         return int(str(st))
 
 def compileAddr(st):
-    addr = hex(compileNum(st)).replace("0x","")
-    if len(addr) == 1:
-        return ("0", "0")
-    else: return (addr[0:2], addr[2:4])
-
-    return 
+    astr = st.replace("$", "")
+    low = astr[0:2]
+    high = astr[2:4]
+    return (int(low, 16), int(high, 16))
 
 def compileChar(st):
     return st.replace("'", "")
@@ -92,24 +92,53 @@ def compileString(st):
     print(out)
     return out
 
+def checkImmediate(st):
+    if st[0] == "@":
+        return True
+    else: return False
+
+def compileReg(reg, imm):
+    if imm:
+        match reg:
+            case "a":
+                return "lai"
+            case "b":
+                return "lbi"
+            case "c":
+                return "lci"
+            case "x":
+                return "lxi"
+            case "y":
+                return "lyi"
+    else:
+        match reg:
+            case "a":
+                return "laa"
+            case "b":
+                return "lba"
+            case "c":
+                return "lca"
+            case "x":
+                return "lxa"
+            case "y":
+                return "lya"
+
 compiled = []
 
 for t in tokens:
     match t.opcode:
         case "ld":
-            if list(t.args[2])[0] == "@":
-                print("ABSOLUTE")
-            compiled.append(opcodes["ld"])
+            immediate = False # immediate or absolute
 
-            match t.args[0]:
-                case "a":
-                    compiled.append(1)
-                case "b":
-                    compiled.append(2)
-                case "c":
-                    compiled.append(3)
-
-            compiled.append(compileNum(t.args[1]))
+            if list(t.args[1])[0] == "@":
+                immediate = False
+                compiled.append(opcodes[compileReg(t.args[0], immediate)])
+                compiled.append(compileAddr(t.args[1].replace("@", ""))[0])
+                compiled.append(compileAddr(t.args[1].replace("@", ""))[1])
+            else:
+                immediate = True
+                compiled.append(opcodes[compileReg(t.args[0], immediate)])
+                compiled.append(int(compileNum(t.args[1])))
         case "st":
             compiled.append(opcodes["st"])
 
@@ -124,8 +153,15 @@ for t in tokens:
             compiled.append(int(compileAddr(t.args[1])[0], 16))
             compiled.append(int(compileAddr(t.args[1])[1], 16))
         case "poke":
-            compiled.append(opcodes["poke"])
-            compiled.append(compileNum(t.args[0]))
+            print(t.args)
+            if list(t.args[0])[0] == "@":
+                compiled.append(opcodes["pka"])
+                compiled.append(int(compileAddr(t.args[0].replace("@", ""))[0], 16))
+                compiled.append(int(compileAddr(t.args[0].replace("@", ""))[1], 16))
+            else:
+                compiled.append(opcodes["pki"])
+                compiled.append(compileNum(t.args[0]))
+            
             compiled.append(int(compileAddr(t.args[1])[0], 16))
             compiled.append(int(compileAddr(t.args[1])[1], 16))
         case "halt":
@@ -136,4 +172,6 @@ for t in tokens:
 with open(sys.argv[2], "wb") as o:
     o.write(bytearray(compiled))
 
+print(compiled)
 print(f"Outputted {len(compiled)} bytes to {sys.argv[2]}")
+
