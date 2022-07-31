@@ -1,2 +1,2 @@
 # Oolong
-8 bit bytecode interpreter
+8 bit fantasy CPU
